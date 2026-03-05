@@ -31,26 +31,32 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
     });
   };
 
+  const handleTargetFieldChange = (
+    field: "cherokee" | "phonetic" | "english",
+  ) => {
+    // When target field changes, clear all masked indices to avoid out-of-bounds/incorrect masks
+    const newLines = lines.map((line) => ({ ...line, maskedWords: [] }));
+
+    onChange({
+      ...module,
+      data: {
+        ...module.data,
+        config: { ...config, targetField: field },
+        lines: newLines,
+      },
+    });
+  };
+
   const handeAddLine = (sentenceItem: VocabItem) => {
     onChange({
       ...module,
       data: {
         ...module.data,
-        lines: [...lines, { sentence: sentenceItem, maskedWords: [] }],
+        lines: [
+          ...lines,
+          { speaker: "npc", sentence: sentenceItem, maskedWords: [] },
+        ],
       },
-    });
-  };
-
-  const handleMaskedWordsChange = (index: number, newWordsStr: string) => {
-    const words = newWordsStr
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s);
-    const newLines = [...lines];
-    newLines[index] = { ...newLines[index], maskedWords: words };
-    onChange({
-      ...module,
-      data: { ...module.data, lines: newLines },
     });
   };
 
@@ -88,45 +94,76 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* 1. Visible Fields Selection */}
-      <div className="bg-gray-50/50 p-4 rounded-lg border border-gray-100 space-y-3">
-        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-          <Settings2 size={14} />
-          Visible Fields in Player
-        </h4>
-        <div className="flex gap-6">
-          {(["cherokee", "phonetic", "english"] as const).map((field) => (
-            <label
-              key={field}
-              className="group flex items-center gap-2 cursor-pointer"
-            >
-              <div className="relative flex items-center">
-                <input
-                  type="checkbox"
-                  className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-blue-600 checked:border-blue-600 transition-all shadow-sm"
-                  checked={config.visibleFields.includes(field)}
-                  onChange={() => handleFieldToggle(field)}
-                />
-                <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+      {/* 1. Configuration Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+            <Settings2 size={14} />
+            Visible Fields in Player
+          </h4>
+          <div className="flex gap-4">
+            {(["cherokee", "phonetic", "english"] as const).map((field) => (
+              <label
+                key={field}
+                className="group flex items-center gap-2 cursor-pointer"
+              >
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-blue-600 checked:border-blue-600 transition-all shadow-sm"
+                    checked={config.visibleFields.includes(field)}
+                    onChange={() => handleFieldToggle(field)}
+                  />
+                  <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-              <span className="text-sm font-medium text-gray-700 capitalize group-hover:text-blue-600 transition-colors">
-                {field}
-              </span>
-            </label>
-          ))}
+                <span className="text-sm font-medium text-gray-700 capitalize group-hover:text-blue-600 transition-colors">
+                  {field}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+            <Eye size={14} />
+            Target field for activity
+          </h4>
+          <div className="flex gap-4">
+            {(["cherokee", "phonetic", "english"] as const).map((field) => (
+              <label
+                key={field}
+                className="group flex items-center gap-2 cursor-pointer"
+              >
+                <div className="relative flex items-center">
+                  <input
+                    type="radio"
+                    name="targetField"
+                    className="peer h-4 w-4 cursor-pointer appearance-none rounded-full border border-gray-300 checked:bg-blue-600 checked:border-blue-600 transition-all shadow-sm"
+                    checked={config.targetField === field}
+                    onChange={() => handleTargetFieldChange(field)}
+                  />
+                  <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100 transition-opacity" />
+                </div>
+                <span className="text-sm font-medium text-gray-700 capitalize group-hover:text-blue-600 transition-colors">
+                  {field}
+                </span>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -146,9 +183,33 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
                   className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
                 >
                   <div className="px-4 py-2 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                      Line #{index + 1}
-                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        Line #{index + 1}
+                      </span>
+                      <div className="flex bg-gray-200/50 p-0.5 rounded-lg border border-gray-300">
+                        {(["npc", "user"] as const).map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              const newLines = [...lines];
+                              newLines[index] = { ...line, speaker: s };
+                              onChange({
+                                ...module,
+                                data: { ...module.data, lines: newLines },
+                              });
+                            }}
+                            className={`px-3 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-tighter transition-all ${
+                              line.speaker === s
+                                ? "bg-white text-blue-600 shadow-sm border border-gray-200"
+                                : "text-gray-400 hover:text-gray-600"
+                            }`}
+                          >
+                            {s === "npc" ? "NPC (Left)" : "User (Right)"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <button
                       onClick={() => handleRemoveLine(index)}
                       className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
@@ -190,15 +251,41 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
                         <Eye size={10} className="text-gray-400" />
                         Masked Words for Activity
                       </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. osiyo, tohiju (comma separated)"
-                        className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
-                        value={line.maskedWords.join(", ")}
-                        onChange={(e) =>
-                          handleMaskedWordsChange(index, e.target.value)
-                        }
-                      />
+                      <div className="flex flex-wrap gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                        {line.sentence[config.targetField]
+                          .split(/\s+/)
+                          .map((word, wordIdx) => {
+                            const isMasked = line.maskedWords.includes(wordIdx);
+                            return (
+                              <button
+                                key={wordIdx}
+                                onClick={() => {
+                                  const newMasked = isMasked
+                                    ? line.maskedWords.filter(
+                                        (i) => i !== wordIdx,
+                                      )
+                                    : [...line.maskedWords, wordIdx];
+                                  const newLines = [...lines];
+                                  newLines[index] = {
+                                    ...line,
+                                    maskedWords: newMasked,
+                                  };
+                                  onChange({
+                                    ...module,
+                                    data: { ...module.data, lines: newLines },
+                                  });
+                                }}
+                                className={`px-2 py-1 rounded text-sm transition-all ${
+                                  isMasked
+                                    ? "bg-blue-600 text-white shadow-sm"
+                                    : "bg-white text-gray-600 border border-gray-200 hover:border-blue-300"
+                                }`}
+                              >
+                                {word}
+                              </button>
+                            );
+                          })}
+                      </div>
                     </div>
                   </div>
                 </div>

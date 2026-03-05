@@ -18,13 +18,15 @@ export interface SentenceModuleData {
 }
 
 export interface ConversationLine {
+  speaker: "user" | "npc";
   sentence: VocabItem;
-  maskedWords: string[];
+  maskedWords: number[]; // Indices into the tokenized sentence
 }
 
 export interface ConversationModuleData {
   config: {
     visibleFields: ("cherokee" | "phonetic" | "english")[];
+    targetField: "cherokee" | "phonetic" | "english";
   };
   lines: ConversationLine[];
   distractorOptions: VocabItem[];
