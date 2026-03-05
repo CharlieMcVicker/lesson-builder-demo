@@ -24,6 +24,7 @@ export interface VocabContext {
   data: VocabContextData;
   upsertItem: (newItem: VocabItem) => void;
   removeItem: (id: string) => void;
+  loadVocab: (items: Record<string, VocabItem>) => void;
 }
 
 const vocabContext = createContext<VocabContext | null>(null);
@@ -53,6 +54,11 @@ export function VocabContextProvider({
                 ([itemId, _]) => itemId != idToDrop,
               ),
             ),
+          }));
+        },
+        loadVocab(items) {
+          setData((d) => ({
+            vocabItems: { ...d.vocabItems, ...items },
           }));
         },
       }}

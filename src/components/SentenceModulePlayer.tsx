@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useVocabContextOrThrow, type VocabItem } from "../vocab-context";
 import type { Module } from "../types/lesson";
-import type { VocabItem } from "../vocab-context";
 
 interface SentenceModulePlayerProps {
   module: Extract<Module, { type: "sentence" }>;
@@ -11,7 +11,17 @@ export const SentenceModulePlayer: React.FC<SentenceModulePlayerProps> = ({
   module,
   onComplete,
 }) => {
-  const { config, targetSentence, orderedPieces } = module.data;
+  const { data: vocabData } = useVocabContextOrThrow();
+  const {
+    config,
+    targetSentence: targetId,
+    orderedPieces: pieceIds,
+  } = module.data;
+
+  const targetSentence = targetId ? vocabData.vocabItems[targetId] : null;
+  const orderedPieces = useMemo(() => {
+    return pieceIds.map((id) => vocabData.vocabItems[id]).filter(Boolean);
+  }, [pieceIds, vocabData.vocabItems]);
 
   const [availablePieces, setAvailablePieces] = useState<VocabItem[]>([]);
   const [assembledPieces, setAssembledPieces] = useState<VocabItem[]>([]);
@@ -46,7 +56,9 @@ export const SentenceModulePlayer: React.FC<SentenceModulePlayerProps> = ({
   const handleCheck = () => {
     const isCorrect =
       assembledPieces.length === orderedPieces.length &&
-      assembledPieces.every((piece, index) => piece.id === orderedPieces[index].id);
+      assembledPieces.every(
+        (piece, index) => piece.id === orderedPieces[index].id,
+      );
 
     if (isCorrect) {
       setIsSuccess(true);
@@ -179,7 +191,9 @@ export const SentenceModulePlayer: React.FC<SentenceModulePlayerProps> = ({
       </div>
 
       {/* Controls */}
-      <div style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "12px" }}
+      >
         {isSuccess ? (
           <div
             style={{

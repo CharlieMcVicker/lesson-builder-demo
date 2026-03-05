@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useVocabContextOrThrow } from "../vocab-context";
 import type { Module } from "../types/lesson";
 
 interface MatchItem {
@@ -15,29 +16,36 @@ export const MatchModulePlayer: React.FC<MatchModulePlayerProps> = ({
   module,
   onComplete,
 }) => {
+  const { data: vocabData } = useVocabContextOrThrow();
   const [matchedIds, setMatchedIds] = useState<string[]>([]);
   const [selectedFront, setSelectedFront] = useState<string | null>(null);
   const [selectedBack, setSelectedBack] = useState<string | null>(null);
   const [errorPair, setErrorPair] = useState<[string, string] | null>(null);
 
+  const moduleVocab = useMemo(() => {
+    return module.data.data
+      .map((id) => vocabData.vocabItems[id])
+      .filter(Boolean);
+  }, [module.data.data, vocabData.vocabItems]);
+
   // Shuffle the items only once on mount
   const shuffledFront = useMemo(() => {
-    return [...module.data.data]
+    return [...moduleVocab]
       .map((item) => ({
         id: item.id,
         text: item[module.data.config.front] as string,
       }))
       .sort(() => Math.random() - 0.5);
-  }, [module.data.data, module.data.config.front]);
+  }, [moduleVocab, module.data.config.front]);
 
   const shuffledBack = useMemo(() => {
-    return [...module.data.data]
+    return [...moduleVocab]
       .map((item) => ({
         id: item.id,
         text: item[module.data.config.back] as string,
       }))
       .sort(() => Math.random() - 0.5);
-  }, [module.data.data, module.data.config.back]);
+  }, [moduleVocab, module.data.config.back]);
 
   useEffect(() => {
     if (selectedFront && selectedBack) {
@@ -63,7 +71,7 @@ export const MatchModulePlayer: React.FC<MatchModulePlayerProps> = ({
     item: MatchItem,
     isSelected: boolean,
     onSelect: (id: string) => void,
-    isSideSelected: boolean
+    isSideSelected: boolean,
   ) => {
     const isMatched = matchedIds.includes(item.id);
     const isError = errorPair?.includes(item.id);
@@ -141,8 +149,8 @@ export const MatchModulePlayer: React.FC<MatchModulePlayerProps> = ({
               item,
               selectedFront === item.id,
               setSelectedFront,
-              !!selectedFront
-            )
+              !!selectedFront,
+            ),
           )}
         </div>
         <div style={{ flex: 1 }}>
@@ -151,8 +159,8 @@ export const MatchModulePlayer: React.FC<MatchModulePlayerProps> = ({
               item,
               selectedBack === item.id,
               setSelectedBack,
-              !!selectedBack
-            )
+              !!selectedBack,
+            ),
           )}
         </div>
       </div>

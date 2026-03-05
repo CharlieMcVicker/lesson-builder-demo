@@ -1,0 +1,142 @@
+{
+  "lesson": {
+    "id": "euz2ie",
+    "title": "Demo lesson for BJ",
+    "description": "",
+    "assignedTo": "",
+    "status": "draft",
+    "modules": [
+      {
+        "id": "hc8mz",
+        "type": "match",
+        "data": {
+          "config": {
+            "front": "phonetic",
+            "back": "english"
+          },
+          "data": [
+            "4b0f39e2-5efd-4a96-a1b4-bb10fa633e15",
+            "c82c3a7f-4f19-4349-aa0a-65e2bc65bc9c",
+            "dfad9e85-0981-4321-ba45-d72ae9408dd6",
+            "98115562-11eb-4b42-aa6d-cf5c76e9255f",
+            "6ee7321e-044e-40e0-86cc-ec3aaf86e0ef",
+            "a34577dd-3822-48bb-a8ed-aa81bf8ffa9f"
+          ]
+        }
+      },
+      {
+        "id": "nnt4fa",
+        "type": "sentence",
+        "data": {
+          "config": {
+            "sentenceField": "english",
+            "pieceField": "phonetic"
+          },
+          "targetSentence": "d3661f76-8a23-4b5f-b8ab-634a09a74a64",
+          "orderedPieces": [
+            "4b0f39e2-5efd-4a96-a1b4-bb10fa633e15",
+            "98115562-11eb-4b42-aa6d-cf5c76e9255f"
+          ]
+        }
+      },
+      {
+        "id": "yeqoof",
+        "type": "conversation",
+        "data": {
+          "config": {
+            "visibleFields": [
+              "english",
+              "phonetic"
+            ],
+            "targetField": "phonetic"
+          },
+          "lines": [
+            {
+              "sentence": "d3661f76-8a23-4b5f-b8ab-634a09a74a64",
+              "maskedWords": [
+                1
+              ],
+              "speaker": "npc"
+            },
+            {
+              "sentence": "6ee7321e-044e-40e0-86cc-ec3aaf86e0ef",
+              "maskedWords": [
+                0
+              ],
+              "speaker": "user"
+            },
+            {
+              "sentence": "98115562-11eb-4b42-aa6d-cf5c76e9255f",
+              "maskedWords": [
+                0
+              ],
+              "speaker": "user"
+            },
+            {
+              "sentence": "a34577dd-3822-48bb-a8ed-aa81bf8ffa9f",
+              "maskedWords": [
+                0
+              ],
+              "speaker": "npc"
+            }
+          ],
+          "distractorOptions": [
+            "c82c3a7f-4f19-4349-aa0a-65e2bc65bc9c",
+            "dfad9e85-0981-4321-ba45-d72ae9408dd6"
+          ]
+        }
+      }
+    ]
+  },
+  "vocab": {
+    "4b0f39e2-5efd-4a96-a1b4-bb10fa633e15": {
+      "cherokee": "ᎣᏏᏲ",
+      "phonetic": "osiyo",
+      "english": "Hello",
+      "type": "word",
+      "id": "4b0f39e2-5efd-4a96-a1b4-bb10fa633e15"
+    },
+    "c82c3a7f-4f19-4349-aa0a-65e2bc65bc9c": {
+      "cherokee": "ᎭᏩ",
+      "phonetic": "hawa",
+      "english": "okay",
+      "type": "word",
+      "id": "c82c3a7f-4f19-4349-aa0a-65e2bc65bc9c"
+    },
+    "dfad9e85-0981-4321-ba45-d72ae9408dd6": {
+      "cherokee": "ᏩᏙ",
+      "phonetic": "wado",
+      "english": "thanks",
+      "type": "word",
+      "id": "dfad9e85-0981-4321-ba45-d72ae9408dd6"
+    },
+    "d3661f76-8a23-4b5f-b8ab-634a09a74a64": {
+      "cherokee": "ᎣᏏᏲ ᎣᏏᏧ?",
+      "phonetic": "osiyo ositsu?",
+      "english": "Hello, how are you?",
+      "type": "word",
+      "id": "d3661f76-8a23-4b5f-b8ab-634a09a74a64"
+    },
+    "98115562-11eb-4b42-aa6d-cf5c76e9255f": {
+      "cherokee": "ᎣᏏᏧ",
+      "phonetic": "ositsu",
+      "english": "How are you?",
+      "type": "word",
+      "id": "98115562-11eb-4b42-aa6d-cf5c76e9255f"
+    },
+    "6ee7321e-044e-40e0-86cc-ec3aaf86e0ef": {
+      "cherokee": "ᎣᏍᏓ",
+      "phonetic": "osda",
+      "english": "good",
+      "type": "word",
+      "id": "6ee7321e-044e-40e0-86cc-ec3aaf86e0ef"
+    },
+    "a34577dd-3822-48bb-a8ed-aa81bf8ffa9f": {
+      "cherokee": "ᎣᏏᏭ",
+      "phonetic": "osiwu",
+      "english": "just fine",
+      "type": "word",
+      "id": "a34577dd-3822-48bb-a8ed-aa81bf8ffa9f"
+    }
+  }
+}

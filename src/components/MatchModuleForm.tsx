@@ -1,7 +1,7 @@
-import { useState, useMemo, type ReactElement } from "react";
+import React, { useMemo } from "react";
 import { type Module } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
-import { type VocabItem } from "../vocab-context";
+import { useVocabContextOrThrow, type VocabItem } from "../vocab-context";
 import { Trash2, GripVertical, Plus } from "lucide-react";
 
 interface MatchModuleFormProps {
@@ -13,7 +13,12 @@ export const MatchModuleForm: React.FC<MatchModuleFormProps> = ({
   module,
   onChange,
 }) => {
-  const { config, data } = module.data;
+  const { data: vocabData } = useVocabContextOrThrow();
+  const { config, data: matchIds } = module.data;
+
+  const data = useMemo(() => {
+    return matchIds.map((id) => vocabData.vocabItems[id]).filter(Boolean);
+  }, [matchIds, vocabData.vocabItems]);
 
   const handleConfigChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
@@ -32,12 +37,12 @@ export const MatchModuleForm: React.FC<MatchModuleFormProps> = ({
   };
 
   const handleSelected = (item: VocabItem) => {
-    if (!data.find((d) => d.id === item.id)) {
+    if (!matchIds.includes(item.id)) {
       onChange({
         ...module,
         data: {
           ...module.data,
-          data: [...data, item],
+          data: [...matchIds, item.id],
         },
       });
     }
@@ -48,7 +53,7 @@ export const MatchModuleForm: React.FC<MatchModuleFormProps> = ({
       ...module,
       data: {
         ...module.data,
-        data: data.filter((item) => item.id !== idToRemove),
+        data: matchIds.filter((id) => id !== idToRemove),
       },
     });
   };

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useVocabContextOrThrow } from "../vocab-context";
 import type { Module } from "../types/lesson";
 
 interface ConversationModulePlayerProps {
@@ -9,7 +10,26 @@ interface ConversationModulePlayerProps {
 export const ConversationModulePlayer: React.FC<
   ConversationModulePlayerProps
 > = ({ module, onComplete }) => {
-  const { config, lines, distractorOptions } = module.data;
+  const { data: vocabData } = useVocabContextOrThrow();
+  const {
+    config,
+    lines: lineData,
+    distractorOptions: distractorIds,
+  } = module.data;
+
+  const lines = useMemo(() => {
+    return lineData
+      .map((line) => ({
+        ...line,
+        sentence: vocabData.vocabItems[line.sentence],
+      }))
+      .filter((l) => !!l.sentence);
+  }, [lineData, vocabData.vocabItems]);
+
+  const distractorOptions = useMemo(() => {
+    return distractorIds.map((id) => vocabData.vocabItems[id]).filter(Boolean);
+  }, [distractorIds, vocabData.vocabItems]);
+
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isError, setIsError] = useState(false);
   const [shuffledOptions, setShuffledOptions] = useState<string[]>([]);

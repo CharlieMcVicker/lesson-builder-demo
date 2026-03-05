@@ -1,11 +1,9 @@
-import type { VocabItem } from "../vocab-context";
-
 export interface MatchModuleData {
   config: {
     front: "cherokee" | "phonetic" | "english";
     back: "cherokee" | "phonetic" | "english";
   };
-  data: VocabItem[];
+  data: string[]; // IDs
 }
 
 export interface SentenceModuleData {
@@ -13,13 +11,13 @@ export interface SentenceModuleData {
     sentenceField: "cherokee" | "phonetic" | "english";
     pieceField: "cherokee" | "phonetic" | "english";
   };
-  targetSentence: VocabItem | null;
-  orderedPieces: VocabItem[];
+  targetSentence: string | null; // ID
+  orderedPieces: string[]; // IDs
 }
 
 export interface ConversationLine {
   speaker: "user" | "npc";
-  sentence: VocabItem;
+  sentence: string; // ID
   maskedWords: number[]; // Indices into the tokenized sentence
 }
 
@@ -29,7 +27,7 @@ export interface ConversationModuleData {
     targetField: "cherokee" | "phonetic" | "english";
   };
   lines: ConversationLine[];
-  distractorOptions: VocabItem[];
+  distractorOptions: string[]; // IDs
 }
 
 export type Module =
@@ -41,7 +39,5 @@ export interface Lesson {
   id: string;
   title: string;
   description: string;
-  assignedTo: string;
-  status: "draft" | "published" | "archived";
   modules: Module[];
 }

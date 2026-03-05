@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { type Module, type ConversationModuleData } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
-import { type VocabItem } from "../vocab-context";
+import { useVocabContextOrThrow, type VocabItem } from "../vocab-context";
 import { Trash2, MessageSquare, Plus, X, Eye, Settings2 } from "lucide-react";
 
 interface ConversationModuleFormProps {
@@ -13,8 +13,12 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
   module,
   onChange,
 }) => {
-  const { config, lines, distractorOptions } =
-    module.data as ConversationModuleData;
+  const { data: vocabData } = useVocabContextOrThrow();
+  const {
+    config,
+    lines,
+    distractorOptions: distractorIds,
+  } = module.data as ConversationModuleData;
 
   const handleFieldToggle = (field: "cherokee" | "phonetic" | "english") => {
     const isVisible = config.visibleFields.includes(field);
@@ -54,7 +58,7 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
         ...module.data,
         lines: [
           ...lines,
-          { speaker: "npc", sentence: sentenceItem, maskedWords: [] },
+          { speaker: "npc", sentence: sentenceItem.id, maskedWords: [] },
         ],
       },
     });
@@ -71,12 +75,12 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
   };
 
   const handleAddDistractor = (item: VocabItem) => {
-    if (!distractorOptions.find((d) => d.id === item.id)) {
+    if (!distractorIds.includes(item.id)) {
       onChange({
         ...module,
         data: {
           ...module.data,
-          distractorOptions: [...distractorOptions, item],
+          distractorOptions: [...distractorIds, item.id],
         },
       });
     }
@@ -87,10 +91,14 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
       ...module,
       data: {
         ...module.data,
-        distractorOptions: distractorOptions.filter((d) => d.id !== idToRemove),
+        distractorOptions: distractorIds.filter((id) => id !== idToRemove),
       },
     });
   };
+
+  const distractorOptions = useMemo(() => {
+    return distractorIds.map((id) => vocabData.vocabItems[id]).filter(Boolean);
+  }, [distractorIds, vocabData.vocabItems]);
 
   return (
     <div className="space-y-8">
@@ -177,119 +185,125 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
         <div className="space-y-4">
           {lines.length > 0 && (
             <div className="space-y-4">
-              {lines.map((line, index) => (
-                <div
-                  key={`${line.sentence.id}-${index}`}
-                  className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
-                >
-                  <div className="px-4 py-2 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                        Line #{index + 1}
-                      </span>
-                      <div className="flex bg-gray-200/50 p-0.5 rounded-lg border border-gray-300">
-                        {(["npc", "user"] as const).map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => {
-                              const newLines = [...lines];
-                              newLines[index] = { ...line, speaker: s };
-                              onChange({
-                                ...module,
-                                data: { ...module.data, lines: newLines },
-                              });
-                            }}
-                            className={`px-3 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-tighter transition-all ${
-                              line.speaker === s
-                                ? "bg-white text-blue-600 shadow-sm border border-gray-200"
-                                : "text-gray-400 hover:text-gray-600"
-                            }`}
-                          >
-                            {s === "npc" ? "NPC (Left)" : "User (Right)"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveLine(index)}
-                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+              {lines.map((line, index) => {
+                const sentence = vocabData.vocabItems[line.sentence];
+                if (!sentence) return null;
 
-                  <div className="p-4 space-y-4">
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
-                          Cherokee
+                return (
+                  <div
+                    key={`${line.sentence}-${index}`}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+                  >
+                    <div className="px-4 py-2 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          Line #{index + 1}
                         </span>
-                        <span className="text-sm font-bold text-gray-900 leading-tight">
-                          {line.sentence.cherokee}
-                        </span>
+                        <div className="flex bg-gray-200/50 p-0.5 rounded-lg border border-gray-300">
+                          {(["npc", "user"] as const).map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => {
+                                const newLines = [...lines];
+                                newLines[index] = { ...line, speaker: s };
+                                onChange({
+                                  ...module,
+                                  data: { ...module.data, lines: newLines },
+                                });
+                              }}
+                              className={`px-3 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-tighter transition-all ${
+                                line.speaker === s
+                                  ? "bg-white text-blue-600 shadow-sm border border-gray-200"
+                                  : "text-gray-400 hover:text-gray-600"
+                              }`}
+                            >
+                              {s === "npc" ? "NPC (Left)" : "User (Right)"}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
-                          English
-                        </span>
-                        <span className="text-sm text-gray-600 leading-tight">
-                          {line.sentence.english}
-                        </span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
-                          Phonetic
-                        </span>
-                        <span className="text-xs text-gray-400 italic font-serif leading-tight">
-                          {line.sentence.phonetic}
-                        </span>
-                      </div>
+                      <button
+                        onClick={() => handleRemoveLine(index)}
+                        className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1.5">
-                        <Eye size={10} className="text-gray-400" />
-                        Masked Words for Activity
-                      </label>
-                      <div className="flex flex-wrap gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg">
-                        {line.sentence[config.targetField]
-                          .split(/\s+/)
-                          .map((word, wordIdx) => {
-                            const isMasked = line.maskedWords.includes(wordIdx);
-                            return (
-                              <button
-                                key={wordIdx}
-                                onClick={() => {
-                                  const newMasked = isMasked
-                                    ? line.maskedWords.filter(
-                                        (i) => i !== wordIdx,
-                                      )
-                                    : [...line.maskedWords, wordIdx];
-                                  const newLines = [...lines];
-                                  newLines[index] = {
-                                    ...line,
-                                    maskedWords: newMasked,
-                                  };
-                                  onChange({
-                                    ...module,
-                                    data: { ...module.data, lines: newLines },
-                                  });
-                                }}
-                                className={`px-2 py-1 rounded text-sm transition-all ${
-                                  isMasked
-                                    ? "bg-blue-600 text-white shadow-sm"
-                                    : "bg-white text-gray-600 border border-gray-200 hover:border-blue-300"
-                                }`}
-                              >
-                                {word}
-                              </button>
-                            );
-                          })}
+                    <div className="p-4 space-y-4">
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="flex flex-col">
+                          <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
+                            Cherokee
+                          </span>
+                          <span className="text-sm font-bold text-gray-900 leading-tight">
+                            {sentence.cherokee}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
+                            English
+                          </span>
+                          <span className="text-sm text-gray-600 leading-tight">
+                            {sentence.english}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
+                            Phonetic
+                          </span>
+                          <span className="text-xs text-gray-400 italic font-serif leading-tight">
+                            {sentence.phonetic}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1.5">
+                          <Eye size={10} className="text-gray-400" />
+                          Masked Words for Activity
+                        </label>
+                        <div className="flex flex-wrap gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                          {sentence[config.targetField]
+                            .split(/\s+/)
+                            .map((word, wordIdx) => {
+                              const isMasked =
+                                line.maskedWords.includes(wordIdx);
+                              return (
+                                <button
+                                  key={wordIdx}
+                                  onClick={() => {
+                                    const newMasked = isMasked
+                                      ? line.maskedWords.filter(
+                                          (i) => i !== wordIdx,
+                                        )
+                                      : [...line.maskedWords, wordIdx];
+                                    const newLines = [...lines];
+                                    newLines[index] = {
+                                      ...line,
+                                      maskedWords: newMasked,
+                                    };
+                                    onChange({
+                                      ...module,
+                                      data: { ...module.data, lines: newLines },
+                                    });
+                                  }}
+                                  className={`px-2 py-1 rounded text-sm transition-all ${
+                                    isMasked
+                                      ? "bg-blue-600 text-white shadow-sm"
+                                      : "bg-white text-gray-600 border border-gray-200 hover:border-blue-300"
+                                  }`}
+                                >
+                                  {word}
+                                </button>
+                              );
+                            })}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

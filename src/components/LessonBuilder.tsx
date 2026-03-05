@@ -1,18 +1,20 @@
 import React from "react";
 import type { Lesson, Module } from "../types/lesson";
-import { 
-  ArrowLeft, 
-  Eye, 
-  Save, 
-  Plus, 
-  ChevronUp, 
-  ChevronDown, 
-  Trash2
+import {
+  ArrowLeft,
+  Eye,
+  Save,
+  Plus,
+  ChevronUp,
+  ChevronDown,
+  Trash2,
+  Upload,
 } from "lucide-react";
 
 import { MatchModuleForm } from "./MatchModuleForm";
 import { SentenceModuleForm } from "./SentenceModuleForm";
 import { ConversationModuleForm } from "./ConversationModuleForm";
+import { useVocabContextOrThrow } from "../vocab-context";
 
 interface LessonBuilderProps {
   lesson: Lesson;
@@ -23,6 +25,54 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
   lesson,
   onLessonChange,
 }) => {
+  const { upsertItem } = useVocabContextOrThrow();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const data = JSON.parse(content);
+
+        let uploadedLesson: Lesson;
+
+        // Detect format: { lesson: Lesson, vocab: Record<string, VocabItem> }
+        if (data.lesson && data.vocab) {
+          uploadedLesson = data.lesson;
+          // Upsert vocab items
+          Object.values(data.vocab).forEach((item: any) => {
+            upsertItem(item);
+          });
+        } else {
+          // Direct Lesson format
+          uploadedLesson = data;
+        }
+
+        // Basic validation
+        if (!uploadedLesson.title || !Array.isArray(uploadedLesson.modules)) {
+          alert("Invalid lesson file format.");
+          return;
+        }
+
+        onLessonChange(uploadedLesson);
+      } catch (error) {
+        console.error("Error parsing lesson JSON:", error);
+        alert("Failed to parse lesson file. Please ensure it is a valid JSON.");
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so the same file can be uploaded again
+    event.target.value = "";
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
   const addModule = (type: "match" | "sentence" | "conversation") => {
     let data: any = {};
     if (type === "match") {
@@ -103,26 +153,31 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
             <span>Lessons</span>
             <ChevronUp size={14} className="rotate-90" />
-            <span className="font-medium text-gray-900">{lesson.title || "New Lesson"}</span>
+            <span className="font-medium text-gray-900">
+              {lesson.title || "New Lesson"}
+            </span>
           </div>
           <h1 className="text-3xl font-extrabold text-[#1a2b3c] tracking-tight mb-1">
             {lesson.title || "New Lesson"}
           </h1>
-          <p className="text-gray-500">Build and manage interactive lesson modules.</p>
+          <p className="text-gray-500">
+            Build and manage interactive lesson modules.
+          </p>
         </div>
-        
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <ArrowLeft size={16} />
-            Back to lessons
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <Eye size={16} />
-            Preview
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
-            <Save size={16} />
-            Save Changes
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            accept=".json"
+            className="hidden"
+          />
+          <button
+            onClick={triggerFileUpload}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+          >
+            <Upload size={18} className="text-gray-400" />
+            Upload Lesson
           </button>
         </div>
       </div>
@@ -132,11 +187,15 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-200">
-              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Lesson Information</h2>
+              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Lesson Information
+              </h2>
             </div>
             <div className="p-6 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-gray-700">Lesson Title</label>
+                <label className="text-sm font-semibold text-gray-700">
+                  Lesson Title
+                </label>
                 <input
                   type="text"
                   value={lesson.title}
@@ -147,7 +206,9 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-gray-700">Description</label>
+                <label className="text-sm font-semibold text-gray-700">
+                  Description
+                </label>
                 <textarea
                   value={lesson.description}
                   onChange={(e) => handleChange("description", e.target.value)}
@@ -155,34 +216,6 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none resize-none"
                   placeholder="Briefly describe the purpose of this lesson..."
                 />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-gray-700">Assigned To</label>
-                  <select
-                    value={lesson.assignedTo}
-                    onChange={(e) => handleChange("assignedTo", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-white"
-                  >
-                    <option value="">Select a student...</option>
-                    <option value="student1">Student 1</option>
-                    <option value="student2">Student 2</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-gray-700">Status</label>
-                  <select
-                    value={lesson.status}
-                    onChange={(e) => handleChange("status", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-white"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
               </div>
             </div>
           </div>
@@ -193,21 +226,21 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-bold text-[#1a2b3c]">Lesson Modules</h2>
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => addModule("match")}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
               >
                 <Plus size={14} />
                 Match
               </button>
-              <button 
+              <button
                 onClick={() => addModule("sentence")}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
               >
                 <Plus size={14} />
                 Sentence
               </button>
-              <button 
+              <button
                 onClick={() => addModule("conversation")}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
               >
@@ -223,8 +256,12 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                 <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Plus className="text-gray-400" />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-1">No modules yet</h3>
-                <p className="text-xs text-gray-500 mb-6">Start building your lesson by adding a module above.</p>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                  No modules yet
+                </h3>
+                <p className="text-xs text-gray-500 mb-6">
+                  Start building your lesson by adding a module above.
+                </p>
               </div>
             ) : (
               lesson.modules.map((module, index) => (
@@ -257,7 +294,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                         <ChevronDown size={16} />
                       </button>
                       <div className="w-px h-4 bg-gray-200 mx-1" />
-                      <button 
+                      <button
                         onClick={() => deleteModule(index)}
                         className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
                       >
@@ -267,7 +304,10 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
                   </div>
                   <div className="p-5">
                     {module.type === "match" && (
-                      <MatchModuleForm module={module} onChange={handleModuleChange} />
+                      <MatchModuleForm
+                        module={module}
+                        onChange={handleModuleChange}
+                      />
                     )}
                     {module.type === "sentence" && (
                       <SentenceModuleForm

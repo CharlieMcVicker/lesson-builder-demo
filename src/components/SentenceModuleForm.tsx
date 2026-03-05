@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { type Module, type SentenceModuleData } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
-import { type VocabItem } from "../vocab-context";
+import { useVocabContextOrThrow, type VocabItem } from "../vocab-context";
 import { Trash2, ChevronUp, ChevronDown, Info, Plus, X } from "lucide-react";
 
 interface SentenceModuleFormProps {
@@ -13,8 +13,17 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
   module,
   onChange,
 }) => {
-  const { config, targetSentence, orderedPieces } =
-    module.data as SentenceModuleData;
+  const { data: vocabData } = useVocabContextOrThrow();
+  const {
+    config,
+    targetSentence: targetId,
+    orderedPieces: pieceIds,
+  } = module.data as SentenceModuleData;
+
+  const targetSentence = targetId ? vocabData.vocabItems[targetId] : null;
+  const orderedPieces = useMemo(() => {
+    return pieceIds.map((id) => vocabData.vocabItems[id]).filter(Boolean);
+  }, [pieceIds, vocabData.vocabItems]);
 
   const handleConfigChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
@@ -37,7 +46,7 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
       ...module,
       data: {
         ...module.data,
-        targetSentence: item,
+        targetSentence: item.id,
       },
     });
   };
@@ -57,7 +66,7 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
       ...module,
       data: {
         ...module.data,
-        orderedPieces: [...orderedPieces, item],
+        orderedPieces: [...pieceIds, item.id],
       },
     });
   };
@@ -67,14 +76,14 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
       ...module,
       data: {
         ...module.data,
-        orderedPieces: orderedPieces.filter((_, idx) => idx !== indexToRemove),
+        orderedPieces: pieceIds.filter((_, idx) => idx !== indexToRemove),
       },
     });
   };
 
   const handleMovePieceUp = (index: number) => {
     if (index === 0) return;
-    const pieces = [...orderedPieces];
+    const pieces = [...pieceIds];
     const [movedPiece] = pieces.splice(index, 1);
     pieces.splice(index - 1, 0, movedPiece);
     onChange({
@@ -87,8 +96,8 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
   };
 
   const handleMovePieceDown = (index: number) => {
-    if (index === orderedPieces.length - 1) return;
-    const pieces = [...orderedPieces];
+    if (index === pieceIds.length - 1) return;
+    const pieces = [...pieceIds];
     const [movedPiece] = pieces.splice(index, 1);
     pieces.splice(index + 1, 0, movedPiece);
     onChange({
