@@ -1,15 +1,6 @@
 import React from "react";
 import type { Lesson, Module } from "../types/lesson";
-import {
-  ArrowLeft,
-  Eye,
-  Save,
-  Plus,
-  ChevronUp,
-  ChevronDown,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { Plus, ChevronUp, ChevronDown, Trash2, Upload } from "lucide-react";
 
 import { MatchModuleForm } from "./MatchModuleForm";
 import { SentenceModuleForm } from "./SentenceModuleForm";

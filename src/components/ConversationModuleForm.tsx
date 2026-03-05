@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { type Module, type ConversationModuleData } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
 import { useVocabContextOrThrow, type VocabItem } from "../vocab-context";
-import { Trash2, MessageSquare, Plus, X, Eye, Settings2 } from "lucide-react";
+import { Trash2, MessageSquare, X, Eye, Settings2 } from "lucide-react";
 
 interface ConversationModuleFormProps {
   module: Module & { type: "conversation" };

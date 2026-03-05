@@ -104,11 +104,6 @@ export const ConversationModulePlayer: React.FC<
               style={{
                 padding: "10px",
                 borderRadius: "8px",
-                backgroundColor: isCurrent
-                  ? isError
-                    ? "#fee2e2"
-                    : "#f0f9ff"
-                  : "#f3f4f6",
                 border: isCurrent
                   ? `2px solid ${isError ? "#ef4444" : "#3b82f6"}`
                   : "1px solid #e5e7eb",
