@@ -40,7 +40,8 @@ function AppContent() {
 
   const loadDemo = async () => {
     try {
-      const response = await fetch("/Demo_lesson_for_BJ.json");
+      const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+      const response = await fetch(`${baseUrl}/Demo_lesson_for_BJ.json`);
       const data = await response.json();
       if (data.lesson && data.vocab) {
         loadVocab(data.vocab);
