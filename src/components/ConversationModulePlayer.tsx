@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Module } from "../types/lesson";
+import React, { useState, useEffect } from "react";
+import type { Module } from "../types/lesson";
 
 interface ConversationModulePlayerProps {
   module: Extract<Module, { type: "conversation" }>;

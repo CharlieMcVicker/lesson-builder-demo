@@ -1,17 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import type { Lesson, Module } from "../types/lesson";
 
 import { MatchModuleForm } from "./MatchModuleForm";
 import { SentenceModuleForm } from "./SentenceModuleForm";
 import { ConversationModuleForm } from "./ConversationModuleForm";
 
-const LessonBuilder: React.FC<{ initialLesson?: Lesson }> = ({
-  initialLesson,
-}) => {
-  const [lesson, setLesson] = useState<Lesson>(
-    initialLesson || { id: "1", title: "New Lesson", modules: [] },
-  );
+interface LessonBuilderProps {
+  lesson: Lesson;
+  onLessonChange: (lesson: Lesson) => void;
+}
 
+const LessonBuilder: React.FC<LessonBuilderProps> = ({
+  lesson,
+  onLessonChange,
+}) => {
   const addModule = (type: "match" | "sentence" | "conversation") => {
     let data: any = {};
     if (type === "match") {
@@ -38,53 +40,50 @@ const LessonBuilder: React.FC<{ initialLesson?: Lesson }> = ({
       type,
       data,
     } as Module;
-    setLesson((prevLesson) => ({
-      ...prevLesson,
-      modules: [...prevLesson.modules, newModule],
-    }));
+
+    onLessonChange({
+      ...lesson,
+      modules: [...lesson.modules, newModule],
+    });
   };
 
   const moveModuleUp = (index: number) => {
     if (index === 0) return;
-    setLesson((prevLesson) => {
-      const newModules = [...prevLesson.modules];
-      const [movedModule] = newModules.splice(index, 1);
-      newModules.splice(index - 1, 0, movedModule);
-      return { ...prevLesson, modules: newModules };
-    });
+    const newModules = [...lesson.modules];
+    const [movedModule] = newModules.splice(index, 1);
+    newModules.splice(index - 1, 0, movedModule);
+    onLessonChange({ ...lesson, modules: newModules });
   };
 
   const moveModuleDown = (index: number) => {
     if (index === lesson.modules.length - 1) return;
-    setLesson((prevLesson) => {
-      const newModules = [...prevLesson.modules];
-      const [movedModule] = newModules.splice(index, 1);
-      newModules.splice(index + 1, 0, movedModule);
-      return { ...prevLesson, modules: newModules };
-    });
+    const newModules = [...lesson.modules];
+    const [movedModule] = newModules.splice(index, 1);
+    newModules.splice(index + 1, 0, movedModule);
+    onLessonChange({ ...lesson, modules: newModules });
   };
 
   const deleteModule = (index: number) => {
-    setLesson((prevLesson) => ({
-      ...prevLesson,
-      modules: prevLesson.modules.filter((_, i) => i !== index),
-    }));
+    onLessonChange({
+      ...lesson,
+      modules: lesson.modules.filter((_, i) => i !== index),
+    });
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLesson((prevLesson) => ({
-      ...prevLesson,
+    onLessonChange({
+      ...lesson,
       title: e.target.value,
-    }));
+    });
   };
 
   const handleModuleChange = (updatedModule: Module) => {
-    setLesson((prevLesson) => ({
-      ...prevLesson,
-      modules: prevLesson.modules.map((m) =>
+    onLessonChange({
+      ...lesson,
+      modules: lesson.modules.map((m) =>
         m.id === updatedModule.id ? updatedModule : m,
       ),
-    }));
+    });
   };
 
   return (
