@@ -1,7 +1,8 @@
-import React from "react";
+import { useState, useMemo, type ReactElement } from "react";
 import { type Module } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
 import { type VocabItem } from "../vocab-context";
+import { Trash2, GripVertical, Plus } from "lucide-react";
 
 interface MatchModuleFormProps {
   module: Module & { type: "match" };
@@ -53,16 +54,16 @@ export const MatchModuleForm: React.FC<MatchModuleFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 border rounded bg-slate-50">
-      <h3 className="font-semibold text-lg">Match Module Config</h3>
-
-      <div className="flex gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Front Field</span>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+        <label className="space-y-1.5">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            Front Field
+          </span>
           <select
             value={config.front}
             onChange={(e) => handleConfigChange(e, "front")}
-            className="p-2 border rounded"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
           >
             <option value="cherokee">Cherokee</option>
             <option value="phonetic">Phonetics</option>
@@ -70,12 +71,14 @@ export const MatchModuleForm: React.FC<MatchModuleFormProps> = ({
           </select>
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Back Field</span>
+        <label className="space-y-1.5">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            Back Field
+          </span>
           <select
             value={config.back}
             onChange={(e) => handleConfigChange(e, "back")}
-            className="p-2 border rounded"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
           >
             <option value="cherokee">Cherokee</option>
             <option value="phonetic">Phonetics</option>
@@ -84,44 +87,74 @@ export const MatchModuleForm: React.FC<MatchModuleFormProps> = ({
         </label>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium">Add Vocabulary</h4>
-        <VocabFindCreate onSelected={handleSelected} />
-      </div>
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+            <Plus size={14} />
+            Matches ({data.length})
+          </h4>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium">Selected Vocabulary ({data.length})</h4>
-        {data.length === 0 ? (
-          <p className="text-sm text-slate-500">No items selected yet.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {data.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-center justify-between p-2 border rounded bg-white"
-              >
-                <div className="flex gap-4">
-                  <span>
-                    <strong>Ꮳ:</strong> {item.cherokee}
-                  </span>
-                  <span>
-                    <strong>P:</strong> {item.phonetic}
-                  </span>
-                  <span>
-                    <strong>E:</strong> {item.english}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleRemove(item.id)}
-                  className="px-2 py-1 text-sm text-red-600 border border-red-200 rounded hover:bg-red-50"
-                  type="button"
+        <div className="space-y-3">
+          {data.length === 0 ? (
+            <div className="text-center py-8 bg-gray-50/30 border border-dashed border-gray-200 rounded-lg">
+              <p className="text-sm text-gray-400">
+                No matching pairs added yet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2">
+              {data.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm group hover:border-gray-300 transition-all"
                 >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                  <GripVertical
+                    size={14}
+                    className="text-gray-300 cursor-grab"
+                  />
+                  <div className="flex-1 grid grid-cols-3 gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-bold text-gray-400">
+                        Cherokee
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {item.cherokee}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-bold text-gray-400">
+                        English
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        {item.english}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-bold text-gray-400">
+                        Phonetic
+                      </span>
+                      <span className="text-sm text-gray-500 italic font-serif">
+                        {item.phonetic}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRemove(item.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded"
+                    type="button"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="pt-2">
+          <VocabFindCreate onSelected={handleSelected} />
+        </div>
       </div>
     </div>
   );

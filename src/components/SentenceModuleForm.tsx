@@ -2,6 +2,7 @@ import React from "react";
 import { type Module, type SentenceModuleData } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
 import { type VocabItem } from "../vocab-context";
+import { Trash2, ChevronUp, ChevronDown, Info, Plus, X } from "lucide-react";
 
 interface SentenceModuleFormProps {
   module: Module & { type: "sentence" };
@@ -100,18 +101,17 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 border rounded bg-slate-50">
-      <h3 className="font-semibold text-lg">Sentence Module Config</h3>
-
-      <div className="flex gap-4">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">
-            Target Sentence Presentation Field
+    <div className="space-y-8">
+      {/* 1. Configuration Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
+        <label className="space-y-1.5">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            Target Sentence Display
           </span>
           <select
             value={config.sentenceField}
             onChange={(e) => handleConfigChange(e, "sentenceField")}
-            className="p-2 border rounded"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
           >
             <option value="cherokee">Cherokee</option>
             <option value="phonetic">Phonetics</option>
@@ -119,12 +119,14 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
           </select>
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">Piece Presentation Field</span>
+        <label className="space-y-1.5">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            Workpieces Display
+          </span>
           <select
             value={config.pieceField}
             onChange={(e) => handleConfigChange(e, "pieceField")}
-            className="p-2 border rounded"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
           >
             <option value="cherokee">Cherokee</option>
             <option value="phonetic">Phonetics</option>
@@ -133,107 +135,123 @@ export const SentenceModuleForm: React.FC<SentenceModuleFormProps> = ({
         </label>
       </div>
 
-      <hr className="my-2 border-t" />
+      {/* 2. Target Sentence Section */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 px-1">
+          <Info size={14} className="text-blue-500" />
+          1. Full Target Sentence
+        </h4>
 
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium text-md">1. Target Sentence</h4>
         {!targetSentence ? (
-          <div>
-            <p className="text-sm text-slate-600 mb-2">
-              Search or create a vocab item to use as the full sentence.
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <p className="text-xs text-gray-400 mb-4 italic">
+              Identify the complete sentence for this module.
             </p>
             <VocabFindCreate onSelected={handleTargetSentenceSelected} />
           </div>
         ) : (
-          <div className="p-3 border rounded bg-white flex items-center justify-between">
-            <div className="flex gap-4">
-              <span>
-                <strong>Ꮳ:</strong> {targetSentence.cherokee}
-              </span>
-              <span>
-                <strong>P:</strong> {targetSentence.phonetic}
-              </span>
-              <span>
-                <strong>E:</strong> {targetSentence.english}
-              </span>
+          <div className="flex items-center gap-3 p-4 bg-blue-50/30 border border-blue-100 rounded-xl shadow-sm">
+            <div className="flex-1 grid grid-cols-3 gap-4">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold text-blue-400">
+                  Cherokee
+                </span>
+                <span className="text-sm font-bold text-gray-900 leading-tight">
+                  {targetSentence.cherokee}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold text-blue-400">
+                  English
+                </span>
+                <span className="text-sm text-gray-700 leading-tight">
+                  {targetSentence.english}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold text-blue-400">
+                  Phonetic
+                </span>
+                <span className="text-sm text-gray-500 italic font-serif leading-tight">
+                  {targetSentence.phonetic}
+                </span>
+              </div>
             </div>
             <button
               onClick={clearTargetSentence}
-              className="px-3 py-1 text-sm text-red-600 border border-red-200 rounded hover:bg-red-50"
-              type="button"
+              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              title="Clear target sentence"
             >
-              Clear
+              <X size={16} />
             </button>
           </div>
         )}
       </div>
 
-      <hr className="my-2 border-t" />
+      {/* 3. Ordered Pieces Section */}
+      <div className="space-y-4">
+        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 px-1">
+          <Plus size={14} className="text-blue-500" />
+          2. Word Fragments (In order)
+        </h4>
 
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium text-md">2. Ordered Pieces</h4>
-        <p className="text-sm text-slate-600 mb-2">
-          Add constituent word-parts in the correct order to form the sentence.
-        </p>
-
-        <VocabFindCreate onSelected={handlePieceSelected} />
-
-        <div className="mt-4">
-          <h5 className="font-medium text-sm mb-2">
-            Current Pieces ({orderedPieces.length})
-          </h5>
-          {orderedPieces.length === 0 ? (
-            <p className="text-sm text-slate-500">No pieces added yet.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
+        <div className="space-y-4">
+          {orderedPieces.length > 0 && (
+            <div className="grid grid-cols-1 gap-2">
               {orderedPieces.map((item, index) => (
-                <li
+                <div
                   key={`${item.id}-${index}`}
-                  className="flex items-center justify-between p-2 border rounded bg-white gap-4"
+                  className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 transition-all group"
                 >
-                  <div className="font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">
-                    #{index + 1}
+                  <div className="w-6 h-6 bg-gray-100 rounded text-[10px] font-bold text-gray-400 flex items-center justify-center shrink-0">
+                    {index + 1}
                   </div>
-                  <div className="flex gap-4 flex-1">
-                    <span>
-                      <strong>Ꮳ:</strong> {item.cherokee}
+
+                  <div className="flex-1 grid grid-cols-3 gap-3 overflow-hidden">
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {item.cherokee}
                     </span>
-                    <span>
-                      <strong>P:</strong> {item.phonetic}
+                    <span className="text-sm text-gray-500 truncate">
+                      {item.english}
                     </span>
-                    <span>
-                      <strong>E:</strong> {item.english}
+                    <span className="text-xs text-gray-400 italic font-serif truncate">
+                      {item.phonetic}
                     </span>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleMovePieceUp(index)}
                       disabled={index === 0}
-                      className="px-2 py-1 text-xs border rounded disabled:opacity-50 hover:bg-slate-50"
-                      type="button"
+                      className="p-1 text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all"
                     >
-                      ↑
+                      <ChevronUp size={14} />
                     </button>
                     <button
                       onClick={() => handleMovePieceDown(index)}
                       disabled={index === orderedPieces.length - 1}
-                      className="px-2 py-1 text-xs border rounded disabled:opacity-50 hover:bg-slate-50"
-                      type="button"
+                      className="p-1 text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all"
                     >
-                      ↓
+                      <ChevronDown size={14} />
                     </button>
                     <button
                       onClick={() => handleRemovePiece(index)}
-                      className="px-2 py-1 text-xs text-red-600 border border-red-200 rounded hover:bg-red-50"
-                      type="button"
+                      className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors ml-1"
                     >
-                      Remove
+                      <Trash2 size={14} />
                     </button>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
+
+          <div className="bg-gray-50/30 border border-dashed border-gray-200 rounded-xl p-4">
+            <p className="text-xs text-gray-400 mb-4 px-1">
+              Add words or particles in the correct order to form the sentence.
+            </p>
+            <VocabFindCreate onSelected={handlePieceSelected} />
+          </div>
         </div>
       </div>
     </div>

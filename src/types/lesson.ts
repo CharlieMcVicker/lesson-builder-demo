@@ -38,5 +38,8 @@ export type Module =
 export interface Lesson {
   id: string;
   title: string;
+  description: string;
+  assignedTo: string;
+  status: "draft" | "published" | "archived";
   modules: Module[];
 }

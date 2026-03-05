@@ -2,6 +2,7 @@ import React from "react";
 import { type Module, type ConversationModuleData } from "../types/lesson";
 import { VocabFindCreate } from "./VocabFindCreate";
 import { type VocabItem } from "../vocab-context";
+import { Trash2, MessageSquare, Plus, X, Eye, Settings2 } from "lucide-react";
 
 interface ConversationModuleFormProps {
   module: Module & { type: "conversation" };
@@ -86,120 +87,166 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 border rounded bg-slate-50">
-      <h3 className="font-semibold text-lg">Conversation Module Config</h3>
-
-      <div className="flex flex-col gap-2">
-        <h4 className="text-sm font-medium">Visible Fields</h4>
-        <div className="flex gap-4">
+    <div className="space-y-8">
+      {/* 1. Visible Fields Selection */}
+      <div className="bg-gray-50/50 p-4 rounded-lg border border-gray-100 space-y-3">
+        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+          <Settings2 size={14} />
+          Visible Fields in Player
+        </h4>
+        <div className="flex gap-6">
           {(["cherokee", "phonetic", "english"] as const).map((field) => (
             <label
               key={field}
-              className="flex items-center gap-2 cursor-pointer"
+              className="group flex items-center gap-2 cursor-pointer"
             >
-              <input
-                type="checkbox"
-                checked={config.visibleFields.includes(field)}
-                onChange={() => handleFieldToggle(field)}
-              />
-              <span className="capitalize">{field}</span>
+              <div className="relative flex items-center">
+                <input
+                  type="checkbox"
+                  className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-blue-600 checked:border-blue-600 transition-all shadow-sm"
+                  checked={config.visibleFields.includes(field)}
+                  onChange={() => handleFieldToggle(field)}
+                />
+                <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3 w-3"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <span className="text-sm font-medium text-gray-700 capitalize group-hover:text-blue-600 transition-colors">
+                {field}
+              </span>
             </label>
           ))}
         </div>
       </div>
 
-      <hr className="my-2 border-t" />
+      {/* 2. Conversation Dialogue Section */}
+      <div className="space-y-4">
+        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 px-1">
+          <MessageSquare size={14} className="text-blue-500" />
+          Dialogue Lines
+        </h4>
 
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium text-md">Conversation Lines</h4>
-        <p className="text-sm text-slate-600 mb-2">
-          Build the dialogue by adding sentence vocab items.
-        </p>
-
-        <VocabFindCreate onSelected={handeAddLine} />
-
-        <div className="mt-4 flex flex-col gap-3">
-          {lines.length === 0 ? (
-            <p className="text-sm text-slate-500">No lines added yet.</p>
-          ) : (
-            lines.map((line, index) => (
-              <div
-                key={`${line.sentence.id}-${index}`}
-                className="flex flex-col gap-2 p-3 border rounded bg-white relative"
-              >
-                <button
-                  onClick={() => handleRemoveLine(index)}
-                  className="absolute top-2 right-2 px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
-                  type="button"
+        <div className="space-y-4">
+          {lines.length > 0 && (
+            <div className="space-y-4">
+              {lines.map((line, index) => (
+                <div
+                  key={`${line.sentence.id}-${index}`}
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
                 >
-                  Remove
-                </button>
-                <div className="font-mono text-xs text-slate-500 mb-1">
-                  Line #{index + 1}
+                  <div className="px-4 py-2 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      Line #{index + 1}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveLine(index)}
+                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                  <div className="p-4 space-y-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
+                          Cherokee
+                        </span>
+                        <span className="text-sm font-bold text-gray-900 leading-tight">
+                          {line.sentence.cherokee}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
+                          English
+                        </span>
+                        <span className="text-sm text-gray-600 leading-tight">
+                          {line.sentence.english}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] uppercase font-bold text-gray-400 mb-0.5">
+                          Phonetic
+                        </span>
+                        <span className="text-xs text-gray-400 italic font-serif leading-tight">
+                          {line.sentence.phonetic}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1.5">
+                        <Eye size={10} className="text-gray-400" />
+                        Masked Words for Activity
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. osiyo, tohiju (comma separated)"
+                        className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                        value={line.maskedWords.join(", ")}
+                        onChange={(e) =>
+                          handleMaskedWordsChange(index, e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col text-sm border-b pb-2 mb-2">
-                  <span>
-                    <strong>Ꮳ:</strong> {line.sentence.cherokee}
-                  </span>
-                  <span>
-                    <strong>P:</strong> {line.sentence.phonetic}
-                  </span>
-                  <span>
-                    <strong>E:</strong> {line.sentence.english}
-                  </span>
-                </div>
-                <label className="flex flex-col gap-1">
-                  <span className="text-xs font-medium text-slate-600">
-                    Masked Words (comma separated)
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="e.g. osiyo, tohiju"
-                    className="p-1 border rounded text-sm w-full"
-                    value={line.maskedWords.join(", ")}
-                    onChange={(e) =>
-                      handleMaskedWordsChange(index, e.target.value)
-                    }
-                  />
-                </label>
-              </div>
-            ))
+              ))}
+            </div>
           )}
+
+          <div className="bg-gray-50/30 border border-dashed border-gray-200 rounded-xl p-4">
+            <p className="text-xs text-gray-400 mb-4 px-1 italic text-center">
+              Construct the dialogue flow by adding sentences below.
+            </p>
+            <VocabFindCreate onSelected={handeAddLine} />
+          </div>
         </div>
       </div>
 
-      <hr className="my-2 border-t" />
+      {/* 3. Distractors Section */}
+      <div className="space-y-4">
+        <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 px-1">
+          <Settings2 size={14} className="text-blue-500" />
+          Distractor Options (Incorrect choices)
+        </h4>
 
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium text-md">Distractor Options</h4>
-        <p className="text-sm text-slate-600 mb-2">
-          Add incorrect options for the masked words.
-        </p>
-
-        <VocabFindCreate onSelected={handleAddDistractor} />
-
-        <div className="mt-2">
-          {distractorOptions.length === 0 ? (
-            <p className="text-sm text-slate-500">No distractors added yet.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
+        <div className="space-y-4">
+          {distractorOptions.length > 0 && (
+            <div className="flex flex-wrap gap-2 p-1">
               {distractorOptions.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 bg-white border px-2 py-1 rounded text-sm shadow-sm"
+                  className="flex items-center gap-2 bg-white border border-gray-200 pl-3 pr-2 py-1.5 rounded-full text-sm shadow-sm hover:border-blue-200 transition-all group"
                 >
-                  <span>{item.cherokee}</span>
+                  <span className="font-medium text-gray-700">
+                    {item.cherokee}
+                  </span>
                   <button
                     onClick={() => handleRemoveDistractor(item.id)}
-                    className="text-slate-400 hover:text-red-500 leading-none"
-                    type="button"
+                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
                   >
-                    &times;
+                    <X size={12} />
                   </button>
                 </div>
               ))}
             </div>
           )}
+
+          <div className="pt-2 border-t border-gray-100">
+            <VocabFindCreate onSelected={handleAddDistractor} />
+          </div>
         </div>
       </div>
     </div>
