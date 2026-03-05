@@ -1,17 +1,10 @@
 import { useState } from "react";
-import {
-  VocabContextProvider,
-  useVocabContextOrThrow,
-  type VocabItem,
-} from "./vocab-context";
-import { VocabFindCreate } from "./components/VocabFindCreate";
+import { VocabContextProvider, useVocabContextOrThrow } from "./vocab-context";
 import LessonBuilder from "./components/LessonBuilder";
 import { LessonPlayer } from "./components/LessonPlayer";
 import type { Lesson } from "./types/lesson";
-import { BookOpen } from "lucide-react";
 
 function AppContent() {
-  const [selected, setSelected] = useState<VocabItem | null>(null);
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [currentLesson, setCurrentLesson] = useState<Lesson>({
     id: Math.random().toString(36).substring(7),
@@ -98,7 +91,7 @@ function AppContent() {
         </header>
 
         <div className="flex gap-8 items-start">
-          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100">
             {viewMode === "edit" ? (
               <div className="p-6">
                 <LessonBuilder
@@ -112,42 +105,6 @@ function AppContent() {
               </div>
             )}
           </div>
-
-          <aside className="w-80 space-y-6 flex-shrink-0 sticky top-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <BookOpen size={20} className="text-teal-600" />
-                Vocab Inventory
-              </h3>
-              <VocabFindCreate onSelected={setSelected} />
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-teal-500" />
-                Current Selection
-              </h4>
-              {selected ? (
-                <div className="p-4 bg-teal-50 rounded-lg border border-teal-100 text-sm">
-                  <p className="mb-2">
-                    <strong className="text-teal-900">Cherokee:</strong>{" "}
-                    <span className="text-teal-700">{selected.cherokee}</span>
-                  </p>
-                  <p className="mb-2">
-                    <strong className="text-teal-900">English:</strong>{" "}
-                    <span className="text-teal-700">{selected.english}</span>
-                  </p>
-                  <p className="text-xs text-teal-500 mt-2 pt-2 border-t border-teal-100">
-                    ID: {selected.id}
-                  </p>
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400 italic">
-                  No item selected.
-                </p>
-              )}
-            </div>
-          </aside>
         </div>
       </main>
     </div>

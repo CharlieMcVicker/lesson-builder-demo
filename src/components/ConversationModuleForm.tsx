@@ -192,7 +192,7 @@ export const ConversationModuleForm: React.FC<ConversationModuleFormProps> = ({
                 return (
                   <div
                     key={`${line.sentence}-${index}`}
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm"
                   >
                     <div className="px-4 py-2 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
                       <div className="flex items-center gap-4">

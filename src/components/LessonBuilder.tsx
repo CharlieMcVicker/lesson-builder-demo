@@ -176,7 +176,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Lesson Information */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
             <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-200">
               <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Lesson Information
@@ -258,7 +258,7 @@ const LessonBuilder: React.FC<LessonBuilderProps> = ({
               lesson.modules.map((module, index) => (
                 <div
                   key={module.id}
-                  className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden group"
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm group"
                 >
                   <div className="px-5 py-3 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
                     <div className="flex items-center gap-3">
